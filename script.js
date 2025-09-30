@@ -2,14 +2,11 @@
 // This is just a fallback static version
 
 const fallbackASCII = `
- ________  ___  ___  ________  ___  ________  _________  ___  _______           ___       ________  ___  ___     
-|\   ____\|\  \|\  \|\   __  \|\  \|\   ____\|\___   ___\\  \|\  ___ \         |\  \     |\   __  \|\  \|\  \    
-\ \  \___|\ \  \\\  \ \  \|\  \ \  \ \  \___|\|___ \  \_\ \  \ \   __/|        \ \  \    \ \  \|\  \ \  \\\  \   
- \ \  \    \ \   __  \ \   _  _\ \  \ \_____  \   \ \  \ \ \  \ \  \_|/__       \ \  \    \ \   __  \ \  \\\  \  
-  \ \  \____\ \  \ \  \ \  \\  \\ \  \|____|\  \   \ \  \ \ \  \ \  \_|\ \       \ \  \____\ \  \ \  \ \  \\\  \ 
-   \ \_______\ \__\ \__\ \__\\ _\\ \__\____\_\  \   \ \__\ \ \__\ \_______\       \ \_______\ \__\ \__\ \_______\
-    \|_______|\|__|\|__|\|__|\|__|\|__|\_________\   \|__|  \|__|\|_______|        \|_______|\|__|\|__|\|_______|
-                                      \|_________|                                                               
+   ______ __          __     __  _         __                
+  / ____// /_   ____ (_)___ / /_(_)___    / /   ____ ___  __
+ / /    / __ \\ / __ \`/ / __  __/ / __ \\  / /   / __ \`/ / / /
+/ /___ / / / // /_/ / / /_/ /_/ / /_/ / / /___/ /_/ / /_/ / 
+\\____//_/ /_/ \\__,_/_/\\__,_/ /_/\\____/ /_____/\\__,_/\\__,_/  
 `;
 
 // Auto-typing effect
@@ -66,11 +63,11 @@ function useFallbackASCII() {
     if (logoContainer) {
         logoContainer.innerHTML = `
             <pre id="ascii-logo" style="color: #00ff41; font-size: 8px; line-height: 1;">
-â–ˆâ–ˆ      â–ˆâ–ˆâ–ˆâ–ˆâ–ˆ  â–ˆâ–ˆ    â–ˆâ–ˆ 
-â–ˆâ–ˆ     â–ˆâ–ˆ   â–ˆâ–ˆ â–ˆâ–ˆ    â–ˆâ–ˆ 
-â–ˆâ–ˆ     â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ â–ˆâ–ˆ    â–ˆâ–ˆ 
-â–ˆâ–ˆ     â–ˆâ–ˆ   â–ˆâ–ˆ â–ˆâ–ˆ    â–ˆâ–ˆ 
-â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ   â–ˆâ–ˆ  â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ  
+██      █████  ██    ██ 
+██     ██   ██ ██    ██ 
+██     ███████ ██    ██ 
+██     ██   ██ ██    ██ 
+█████████   ██  ██████  
             </pre>
         `;
     }
@@ -156,7 +153,7 @@ function createASCIILogo() {
     // Scale: 1, 1, 1 (default, no change needed)
     group.scale.set(1, 1, 1);
     
-    // Rotation: -90Â° on X-axis, 0Â° on Y and Z
+    // Rotation: -90° on X-axis, 0° on Y and Z
     group.rotation.set(-90 * Math.PI / 180, 0, 0);
     
     // Center the group and compute bounding box like original
@@ -179,9 +176,9 @@ function createASCIILogo() {
     function animate() {
         requestAnimationFrame(animate);
         
-        // Rotate on Z-axis only (keeping the -90Â° X rotation as base)
+        // Rotate on Z-axis only (keeping the -90° X rotation as base)
         group.rotation.z += 0.01; // Using original rotation speed
-        // Maintain the X rotation at -90Â°
+        // Maintain the X rotation at -90°
         group.rotation.x = -90 * Math.PI / 180;
         
         effect.render(scene, camera);
