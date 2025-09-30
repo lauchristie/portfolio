@@ -1,5 +1,7 @@
-// ASCII logo for Christie Lau
-const asciiLogo = `
+// ASCII logo will be handled by ascii-logo.js
+// This is just a fallback static version
+
+const fallbackASCII = `
    ______ __          __     __  _         __                
   / ____// /_   ____ (_)___ / /_(_)___    / /   ____ ___  __
  / /    / __ \\ / __ \`/ / __  __/ / __ \\  / /   / __ \`/ / / /
@@ -28,9 +30,11 @@ function typeText(element, text, speed = 50) {
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
-    // Display ASCII logo immediately
+    // Fallback ASCII logo if 3D version doesn't load
     const logoElement = document.getElementById('ascii-logo');
-    logoElement.textContent = asciiLogo;
+    if (logoElement && !logoElement.textContent.trim()) {
+        logoElement.textContent = fallbackASCII;
+    }
     
     // Type the initial command
     const initialCommand = document.getElementById('initial-command');
