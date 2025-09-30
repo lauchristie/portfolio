@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug 3D Logo Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body { 
+            margin: 0; 
+            background: #000; 
+            color: #00ff41; 
+            font-family: monospace; 
+            overflow: hidden;
+        }
+        #controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border: 1px solid #00ff41;
+            z-index: 100;
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 250px;
+        }
+        .control-group {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .control-group h3 {
+            margin: 0 0 10px 0;
+            color: #00ff41;
+        }
+        .slider-container {
+            margin: 5px 0;
+        }
+        .slider-container label {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 12px;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        .value-display {
+            font-size: 11px;
+            color: #888;
+        }
+        button {
+            background: #00ff41;
+            color: #000;
+            border: none;
+            padding: 5px 10px;
+            margin: 2px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        button:hover {
+            background: #00cc33;
+        }
+        #output {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border: 1px solid #00ff41;
+            font-size: 11px;
+            max-width: 250px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <h3>3D Debug Controls</h3>
+        
+        <div class="control-group">
+            <h3>Camera</h3>
+            <div class="slider-container">
+                <label>Camera X: <span id="camX-val">5</span></label>
+                <input type="range" id="camX" min="-20" max="20" value="5" step="0.5">
+            </div>
+            <div class="slider-container">
+                <label>Camera Y: <span id="camY-val">5</span></label>
+                <input type="range" id="camY" min="-20" max="20" value="5" step="0.5">
+            </div>
+            <div class="slider-container">
+                <label>Camera Z: <span id="camZ-val">8</span></label>
+                <input type="range" id="camZ" min="1" max="50" value="8" step="0.5">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <h3>Model Scale</h3>
+            <div class="slider-container">
+                <label>Scale: <span id="scale-val">1</span></label>
+                <input type="range" id="scale" min="0.1" max="5" value="1" step="0.1">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <h3>Model Rotation</h3>
+            <div class="slider-container">
+                <label>Rotation X: <span id="rotX-val">-90</span>°</label>
+                <input type="range" id="rotX" min="-180" max="180" value="-90" step="5">
+            </div>
+            <div class="slider-container">
+                <label>Rotation Y: <span id="rotY-val">0</span>°</label>
+                <input type="range" id="rotY" min="-180" max="180" value="0" step="5">
+            </div>
+            <div class="slider-container">
+                <label>Rotation Z: <span id="rotZ-val">0</span>°</label>
+                <input type="range" id="rotZ" min="-180" max="180" value="0" step="5">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <h3>Model Position</h3>
+            <div class="slider-container">
+                <label>Position X: <span id="posX-val">0</span></label>
+                <input type="range" id="posX" min="-10" max="10" value="0" step="0.5">
+            </div>
+            <div class="slider-container">
+                <label>Position Y: <span id="posY-val">0</span></label>
+                <input type="range" id="posY" min="-10" max="10" value="0" step="0.5">
+            </div>
+            <div class="slider-container">
+                <label>Position Z: <span id="posZ-val">0</span></label>
+                <input type="range" id="posZ" min="-10" max="10" value="0" step="0.5">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <h3>Light</h3>
+            <div class="slider-container">
+                <label>Light Angle: <span id="lightAngle-val">45</span>°</label>
+                <input type="range" id="lightAngle" min="0" max="360" value="45" step="5">
+            </div>
+            <div class="slider-container">
+                <label>Light Distance: <span id="lightDist-val">10</span></label>
+                <input type="range" id="lightDist" min="1" max="50" value="10" step="1">
+            </div>
+            <div class="slider-container">
+                <label>Light Height: <span id="lightHeight-val">10</span></label>
+                <input type="range" id="lightHeight" min="-20" max="20" value="10" step="1">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <button onclick="toggleRotation()">Toggle Auto-Rotation</button>
+            <button onclick="resetValues()">Reset All</button>
+            <button onclick="exportValues()">Export Values</button>
+        </div>
+    </div>
+
+    <div id="output">
+        <div>Current Values:</div>
+        <div id="current-values"></div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, group, pointLight, controls;
+        let autoRotate = false;
+
+        // Initialize 3D scene
+        function init() {
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+
+            // Lighting
+            pointLight = new THREE.PointLight(0xffffff, 1, 0, 0);
+            scene.add(pointLight);
+
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+            scene.add(ambientLight);
+
+            // Create test geometry (replace with STL later)
+            createTestGeometry();
+
+            // Set up event listeners
+            setupControls();
+
+            // Initial update
+            updateAll();
+
+            // Animation loop
+            animate();
+        }
+
+        function createTestGeometry() {
+            group = new THREE.Group();
+            
+            const material = new THREE.MeshStandardMaterial({
+                color: 0x00ff41,
+                flatShading: true,
+                side: THREE.DoubleSide
+            });
+
+            // L
+            const lGeometry = new THREE.BoxGeometry(0.5, 3, 0.5);
+            const lMesh = new THREE.Mesh(lGeometry, material);
+            lMesh.position.set(-2, 0, 0);
+            group.add(lMesh);
+
+            // A 
+            const aGeometry = new THREE.ConeGeometry(0.7, 3, 4);
+            const aMesh = new THREE.Mesh(aGeometry, material);
+            aMesh.position.set(0, 0, 0);
+            group.add(aMesh);
+
+            // U
+            const uGeometry = new THREE.TorusGeometry(0.8, 0.3, 8, 16, Math.PI);
+            const uMesh = new THREE.Mesh(uGeometry, material);
+            uMesh.position.set(2, 0, 0);
+            uMesh.rotation.z = Math.PI;
+            group.add(uMesh);
+
+            scene.add(group);
+        }
+
+        function setupControls() {
+            const sliders = ['camX', 'camY', 'camZ', 'scale', 'rotX', 'rotY', 'rotZ', 
+                           'posX', 'posY', 'posZ', 'lightAngle', 'lightDist', 'lightHeight'];
+            
+            sliders.forEach(id => {
+                const slider = document.getElementById(id);
+                const display = document.getElementById(id + '-val');
+                
+                slider.addEventListener('input', (e) => {
+                    display.textContent = e.target.value;
+                    updateAll();
+                });
+            });
+        }
+
+        function updateAll() {
+            updateCamera();
+            updateModel();
+            updateLight();
+            updateValueDisplay();
+        }
+
+        function updateCamera() {
+            camera.position.set(
+                parseFloat(document.getElementById('camX').value),
+                parseFloat(document.getElementById('camY').value),
+                parseFloat(document.getElementById('camZ').value)
+            );
+        }
+
+        function updateModel() {
+            const scale = parseFloat(document.getElementById('scale').value);
+            group.scale.set(scale, scale, scale);
+
+            group.rotation.set(
+                parseFloat(document.getElementById('rotX').value) * Math.PI / 180,
+                parseFloat(document.getElementById('rotY').value) * Math.PI / 180,
+                parseFloat(document.getElementById('rotZ').value) * Math.PI / 180
+            );
+
+            group.position.set(
+                parseFloat(document.getElementById('posX').value),
+                parseFloat(document.getElementById('posY').value),
+                parseFloat(document.getElementById('posZ').value)
+            );
+        }
+
+        function updateLight() {
+            const angle = parseFloat(document.getElementById('lightAngle').value) * Math.PI / 180;
+            const distance = parseFloat(document.getElementById('lightDist').value);
+            const height = parseFloat(document.getElementById('lightHeight').value);
+
+            pointLight.position.set(
+                Math.cos(angle) * distance,
+                height,
+                Math.sin(angle) * distance
+            );
+        }
+
+        function updateValueDisplay() {
+            const values = {
+                camera: {
+                    x: document.getElementById('camX').value,
+                    y: document.getElementById('camY').value,
+                    z: document.getElementById('camZ').value
+                },
+                model: {
+                    scale: document.getElementById('scale').value,
+                    rotX: document.getElementById('rotX').value,
+                    rotY: document.getElementById('rotY').value,
+                    rotZ: document.getElementById('rotZ').value,
+                    posX: document.getElementById('posX').value,
+                    posY: document.getElementById('posY').value,
+                    posZ: document.getElementById('posZ').value
+                },
+                light: {
+                    angle: document.getElementById('lightAngle').value,
+                    distance: document.getElementById('lightDist').value,
+                    height: document.getElementById('lightHeight').value
+                }
+            };
+
+            document.getElementById('current-values').innerHTML = 
+                `Cam: (${values.camera.x}, ${values.camera.y}, ${values.camera.z})<br>` +
+                `Scale: ${values.model.scale}<br>` +
+                `Rot: (${values.model.rotX}°, ${values.model.rotY}°, ${values.model.rotZ}°)<br>` +
+                `Pos: (${values.model.posX}, ${values.model.posY}, ${values.model.posZ})<br>` +
+                `Light: ${values.light.angle}°, d=${values.light.distance}, h=${values.light.height}`;
+        }
+
+        function toggleRotation() {
+            autoRotate = !autoRotate;
+        }
+
+        function resetValues() {
+            document.getElementById('camX').value = 5;
+            document.getElementById('camY').value = 5;
+            document.getElementById('camZ').value = 8;
+            document.getElementById('scale').value = 1;
+            document.getElementById('rotX').value = -90;
+            document.getElementById('rotY').value = 0;
+            document.getElementById('rotZ').value = 0;
+            document.getElementById('posX').value = 0;
+            document.getElementById('posY').value = 0;
+            document.getElementById('posZ').value = 0;
+            document.getElementById('lightAngle').value = 45;
+            document.getElementById('lightDist').value = 10;
+            document.getElementById('lightHeight').value = 10;
+            
+            // Update displays
+            document.querySelectorAll('[id$="-val"]').forEach(display => {
+                const sliderId = display.id.replace('-val', '');
+                display.textContent = document.getElementById(sliderId).value;
+            });
+            
+            updateAll();
+        }
+
+        function exportValues() {
+            const values = {
+                camera: { x: document.getElementById('camX').value, y: document.getElementById('camY').value, z: document.getElementById('camZ').value },
+                scale: document.getElementById('scale').value,
+                rotation: { x: document.getElementById('rotX').value, y: document.getElementById('rotY').value, z: document.getElementById('rotZ').value },
+                position: { x: document.getElementById('posX').value, y: document.getElementById('posY').value, z: document.getElementById('posZ').value },
+                light: { angle: document.getElementById('lightAngle').value, distance: document.getElementById('lightDist').value, height: document.getElementById('lightHeight').value }
+            };
+            
+            console.log('EXPORT VALUES:', JSON.stringify(values, null, 2));
+            alert('Values exported to console! Press F12 to see them.');
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (autoRotate) {
+                group.rotation.z += 0.01;
+                document.getElementById('rotZ').value = (group.rotation.z * 180 / Math.PI) % 360;
+                document.getElementById('rotZ-val').textContent = Math.round(group.rotation.z * 180 / Math.PI) % 360;
+            }
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize when page loads
+        init();
+    </script>
+</body>
+</html>
