@@ -1,0 +1,236 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #0c0c0c;
+    color: #00ff41;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-x: auto;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.terminal {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+/* Terminal header */
+.terminal-header {
+    background-color: #2d2d2d;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.window-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.control {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.control.close {
+    background-color: #ff5f57;
+}
+
+.control.minimize {
+    background-color: #ffbd2e;
+}
+
+.control.maximize {
+    background-color: #28ca42;
+}
+
+.terminal-title {
+    color: #ffffff;
+    font-size: 12px;
+    flex: 1;
+    text-align: center;
+    margin-right: 60px; /* Balance the window controls */
+}
+
+/* Terminal content */
+.terminal-content {
+    padding: 20px;
+    background-color: #0c0c0c;
+}
+
+/* ASCII logo placeholder */
+#ascii-logo {
+    margin-bottom: 20px;
+    font-size: 10px;
+    line-height: 1;
+    color: #00ff41;
+    white-space: pre;
+}
+
+/* Command line styling */
+.command-line {
+    margin: 10px 0;
+}
+
+.prompt {
+    color: #00ff41;
+    margin-right: 5px;
+}
+
+.command {
+    color: #ffffff;
+}
+
+.typed-command {
+    color: #ffffff;
+}
+
+/* Version and bio sections */
+.version-info {
+    margin: 15px 0;
+    color: #00ff41;
+}
+
+.bio-section {
+    margin: 20px 0;
+}
+
+.bio-text {
+    color: #cccccc;
+    margin: 10px 0;
+}
+
+/* Directory listing */
+.directory-listing {
+    margin: 10px 0 20px 0;
+}
+
+.nav-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 2px 0;
+    display: flex;
+    align-items: center;
+}
+
+.nav-item:hover {
+    background-color: #1f1f1f;
+    padding-left: 5px;
+}
+
+.nav-item:hover .arrow {
+    content: ">>";
+    color: #ffff00;
+}
+
+.arrow {
+    color: #00ff41;
+    margin-right: 5px;
+    width: 15px;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover .arrow::before {
+    content: ">>";
+}
+
+.nav-item .arrow::before {
+    content: ">";
+}
+
+.folder-name {
+    color: #ffffff;
+}
+
+.nav-item:hover .folder-name {
+    color: #00ff41;
+}
+
+/* Contact and CV sections */
+.contact-info,
+.cv-download {
+    margin: 10px 0;
+    color: #cccccc;
+}
+
+.contact-info a,
+.cv-download a {
+    color: #00ff41;
+    text-decoration: none;
+}
+
+.contact-info a:hover,
+.cv-download a:hover {
+    color: #ffff00;
+    text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .terminal {
+        margin: 0;
+    }
+    
+    .terminal-content {
+        padding: 15px;
+    }
+    
+    body {
+        font-size: 12px;
+    }
+    
+    #ascii-logo {
+        font-size: 8px;
+    }
+}
+
+/* Typing cursor animation */
+.typing-cursor::after {
+    content: "_";
+    animation: blink 1s infinite;
+    color: #00ff41;
+}
+
+@keyframes blink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0;
+    }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #00ff41;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #00cc33;
+}
