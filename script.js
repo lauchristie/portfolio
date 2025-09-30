@@ -2,11 +2,14 @@
 // This is just a fallback static version
 
 const fallbackASCII = `
-   ______ __          __     __  _         __                
-  / ____// /_   ____ (_)___ / /_(_)___    / /   ____ ___  __
- / /    / __ \\ / __ \`/ / __  __/ / __ \\  / /   / __ \`/ / / /
-/ /___ / / / // /_/ / / /_/ /_/ / /_/ / / /___/ /_/ / /_/ / 
-\\____//_/ /_/ \\__,_/_/\\__,_/ /_/\\____/ /_____/\\__,_/\\__,_/  
+ ________  ___  ___  ________  ___  ________  _________  ___  _______           ___       ________  ___  ___     
+|\   ____\|\  \|\  \|\   __  \|\  \|\   ____\|\___   ___\\  \|\  ___ \         |\  \     |\   __  \|\  \|\  \    
+\ \  \___|\ \  \\\  \ \  \|\  \ \  \ \  \___|\|___ \  \_\ \  \ \   __/|        \ \  \    \ \  \|\  \ \  \\\  \   
+ \ \  \    \ \   __  \ \   _  _\ \  \ \_____  \   \ \  \ \ \  \ \  \_|/__       \ \  \    \ \   __  \ \  \\\  \  
+  \ \  \____\ \  \ \  \ \  \\  \\ \  \|____|\  \   \ \  \ \ \  \ \  \_|\ \       \ \  \____\ \  \ \  \ \  \\\  \ 
+   \ \_______\ \__\ \__\ \__\\ _\\ \__\____\_\  \   \ \__\ \ \__\ \_______\       \ \_______\ \__\ \__\ \_______\
+    \|_______|\|__|\|__|\|__|\|__|\|__|\_________\   \|__|  \|__|\|_______|        \|_______|\|__|\|__|\|_______|
+                                      \|_________|                                                               
 `;
 
 // Auto-typing effect
@@ -80,26 +83,26 @@ function createASCIILogo() {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
     
-    // Camera - back to original position but slightly closer
-     const camera = new THREE.PerspectiveCamera(45, 2, 0.1, 2000);
-    camera.position.set(0, 0, 10); // Centered and pulled back
-    camera.lookAt(0, 0, 0); // Look at center
+    // Use full container dimensions like the original
+    const containerWidth = 600;
+    const containerHeight = 300;
+    
+    // Camera setup matching original proportions
+    const camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 0.1, 2000);
     
     // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     
-    // ASCII Effect - keep larger canvas, revert resolution
+    // ASCII Effect using original parameters
     const characters = ' .:-+*=%@#';
     const effect = new THREE.AsciiEffect(renderer, characters, { 
         invert: true, 
-        resolution: 0.15 // Back to original
+        resolution: 0.205 // Using original resolution setting
     });
     
-    effect.setSize(600, 300); // Keep larger canvas
+    effect.setSize(containerWidth, containerHeight);
     effect.domElement.style.color = '#00ff41';
     effect.domElement.style.backgroundColor = 'transparent';
-    effect.domElement.style.fontSize = '6px'; // Back to original
-    effect.domElement.style.lineHeight = '6px';
     
     // Add to page
     const logoContainer = document.getElementById('ascii-logo-container');
@@ -109,49 +112,65 @@ function createASCIILogo() {
         console.log('ASCII effect added to page');
     }
     
-    // Lighting - back to original
-    const pointLight = new THREE.PointLight(0xffffff, 1);
-    pointLight.position.set(10, 10, 5);
+    // Lighting setup matching original
+    const pointLight = new THREE.PointLight(0xffffff, 1, 0, 0);
+    pointLight.position.set(100, 100, 400);
     scene.add(pointLight);
     
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
-    scene.add(ambientLight);
-    
-    // Create original size "LAU" geometry
+    // Create "LAU" geometry
     const group = new THREE.Group();
     
-    // L - back to original size
+    // Material matching original
+    const material = new THREE.MeshStandardMaterial();
+    material.flatShading = true;
+    material.side = THREE.DoubleSide;
+    
+    // L
     const lGeometry = new THREE.BoxGeometry(0.5, 3, 0.5);
-    const lMesh = new THREE.Mesh(lGeometry, new THREE.MeshLambertMaterial());
+    const lMesh = new THREE.Mesh(lGeometry, material);
     lMesh.position.set(-2, 0, 0);
     group.add(lMesh);
     
-    // A - back to original
-    const aGeometry = new THREE.ConeGeometry(0.7, 3, 3);
-    const aMesh = new THREE.Mesh(aGeometry, new THREE.MeshLambertMaterial());
+    // A 
+    const aGeometry = new THREE.ConeGeometry(0.7, 3, 4);
+    const aMesh = new THREE.Mesh(aGeometry, material);
     aMesh.position.set(0, 0, 0);
     group.add(aMesh);
     
-    // U - back to original
+    // U
     const uGeometry = new THREE.TorusGeometry(0.8, 0.3, 8, 16, Math.PI);
-    const uMesh = new THREE.Mesh(uGeometry, new THREE.MeshLambertMaterial());
+    const uMesh = new THREE.Mesh(uGeometry, material);
     uMesh.position.set(2, 0, 0);
     uMesh.rotation.z = Math.PI;
     group.add(uMesh);
     
+    // Center the group and compute bounding box like original
+    const box = new THREE.Box3().setFromObject(group);
+    const center = box.getCenter(new THREE.Vector3());
+    group.position.sub(center); // Center the geometry
+    
     scene.add(group);
+    
+    // Calculate bounding box for camera positioning (like original)
+    const bbox = box;
+    const size = bbox.getSize(new THREE.Vector3());
+    
+    // Position camera based on bounding box (original approach)
+    camera.position.x = size.x * 2;
+    camera.position.y = size.y * 1;
+    camera.position.z = size.z * 4;
     
     // Animation loop
     function animate() {
         requestAnimationFrame(animate);
         
         // Rotate on Z-axis only
-        group.rotation.z += 0.02;
+        group.rotation.z += 0.01; // Using original rotation speed
         
         effect.render(scene, camera);
     }
     
-    console.log('Starting 3D animation');
+    console.log('Starting 3D animation with original parameters');
     animate();
 }
 
