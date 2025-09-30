@@ -79,14 +79,26 @@ function useFallbackASCII() {
 function createASCIILogo() {
     console.log('Creating 3D ASCII logo with exported values');
     
-    // Exported values from debug session
-    const exportedValues = {
+    // Exported values from debug session - for STL file
+    const stlValues = {
         camera: { x: 10, y: 10, z: 6.5 },
         scale: 0.2,
         rotation: { x: -120, y: -30, z: 90 },
         position: { x: 0, y: 0, z: 0 },
         light: { angle: 45, distance: 4, height: 6 }
     };
+    
+    // Fallback values for simple geometry (matching original resetPositions)
+    const fallbackValues = {
+        camera: { x: 5, y: 3, z: 8 },
+        scale: 1,
+        rotation: { x: -90, y: 0, z: 0 },
+        position: { x: 0, y: 0, z: 0 },
+        light: { angle: 45, distance: 10, height: 10 }
+    };
+    
+    // Will be set based on whether STL loads or fallback is used
+    let exportedValues = stlValues;
     
     // Scene setup
     const scene = new THREE.Scene();
@@ -153,10 +165,10 @@ function createASCIILogo() {
     const loader = new THREE.STLLoader();
     
     const paths = [
-        'portfolio/assets/LAU.stl',
         'assets/LAU.stl',
-        '../assets/LAU.stl',
-        './assets/LAU.stl'
+        './assets/LAU.stl',
+        '/portfolio/assets/LAU.stl',
+        'LAU.stl'
     ];
     
     let pathIndex = 0;
@@ -207,7 +219,19 @@ function createASCIILogo() {
     }
     
     function createFallbackGeometry() {
-        console.log('Creating fallback LAU geometry');
+        console.log('Creating fallback LAU geometry - using fallback values');
+        
+        // Switch to fallback values for simple geometry
+        exportedValues = fallbackValues;
+        camera.position.set(exportedValues.camera.x, exportedValues.camera.y, exportedValues.camera.z);
+        
+        // Update light for fallback
+        const lightAngle = exportedValues.light.angle * Math.PI / 180;
+        pointLight.position.set(
+            Math.cos(lightAngle) * exportedValues.light.distance,
+            exportedValues.light.height,
+            Math.sin(lightAngle) * exportedValues.light.distance
+        );
         
         // L
         const lGeometry = new THREE.BoxGeometry(0.5, 3, 0.5);
