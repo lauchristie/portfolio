@@ -1,143 +1,127 @@
 /*
- * 3D ASCII Logo functionality adapted from:
- * STL-to-ASCII-Generator by AndrewSink
- * https://github.com/AndrewSink/STL-to-ASCII-Generator
- * MIT License
+ * Debug version - let's see what's working
  */
 
-class ASCIILogo {
-    constructor() {
-        this.scene = null;
-        this.camera = null;
-        this.renderer = null;
-        this.effect = null;
-        this.mesh = null;
-        this.stlLoader = new THREE.STLLoader();
-        
-        // ASCII settings matching the original
-        this.characters = ' .:-+*=%@#';
-        this.effectSize = { amount: 0.205 };
-        this.backgroundColor = 'black';
-        this.ASCIIColor = 'white';
-        
-        this.init();
-    }
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('ASCII Logo script loaded');
     
-    init() {
-        // Create scene
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0, 0, 0);
-        
-        // Setup camera 
-        const width = Math.min(window.innerWidth, 800);
-        const height = Math.min(window.innerHeight, 400);
-        
-        this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
-        
-        // Create renderer
-        this.renderer = new THREE.WebGLRenderer();
-        
-        // Create ASCII effect (this is the key missing piece!)
-        this.effect = new THREE.AsciiEffect(this.renderer, this.characters, { 
-            invert: true, 
-            resolution: this.effectSize.amount 
-        });
-        this.effect.setSize(width, height);
-        this.effect.domElement.style.color = this.ASCIIColor;
-        this.effect.domElement.style.backgroundColor = this.backgroundColor;
-        
-        // Add lighting
-        const pointLight = new THREE.PointLight(0xffffff, 1, 0, 0);
-        pointLight.position.set(100, 100, 400);
-        this.scene.add(pointLight);
-        
-        // Replace the ASCII logo div with the ASCII effect
-        const logoContainer = document.getElementById('ascii-logo-container');
-        if (logoContainer) {
-            logoContainer.innerHTML = '';
-            logoContainer.appendChild(this.effect.domElement);
-        }
-        
-        // Load a simple geometry as placeholder (or your STL)
-        this.loadDefaultGeometry();
-        
-        // Start animation
-        this.animate();
+    // Check if Three.js is available
+    if (typeof THREE === 'undefined') {
+        console.error('THREE.js not loaded');
+        return;
     }
+    console.log('THREE.js loaded:', THREE.REVISION);
     
-    loadDefaultGeometry() {
-        // Create simple "LAU"-like geometry as placeholder
-        const geometry = new THREE.BoxGeometry(2, 1, 0.5);
-        const material = new THREE.MeshStandardMaterial();
-        material.flatShading = true;
-        material.side = THREE.DoubleSide;
-        
-        this.mesh = new THREE.Mesh(geometry, material);
-        
-        // Center and position the mesh
-        geometry.computeVertexNormals();
-        geometry.center();
-        geometry.computeBoundingBox();
-        
-        const bbox = geometry.boundingBox;
-        this.mesh.position.y = (bbox.max.z - bbox.min.z) / 5;
-        
-        // Position camera
-        this.camera.position.x = bbox.max.x * 4;
-        this.camera.position.y = bbox.max.y;
-        this.camera.position.z = bbox.max.z * 3;
-        
-        this.scene.add(this.mesh);
-        
-        // TODO: Replace with your actual STL file
-        // this.loadSTL('./assets/lau-logo.stl');
+    // Check if AsciiEffect is available
+    if (typeof THREE.AsciiEffect === 'undefined') {
+        console.error('AsciiEffect not loaded - using fallback');
+        useFallbackASCII();
+        return;
     }
+    console.log('AsciiEffect loaded');
     
-    loadSTL(url) {
-        this.stlLoader.load(url, (geometry) => {
-            if (this.mesh) {
-                this.scene.remove(this.mesh);
-            }
-            
-            const material = new THREE.MeshStandardMaterial();
-            material.flatShading = true;
-            material.side = THREE.DoubleSide;
-            
-            this.mesh = new THREE.Mesh(geometry, material);
-            
-            geometry.computeVertexNormals();
-            geometry.center();
-            geometry.computeBoundingBox();
-            
-            const bbox = geometry.boundingBox;
-            this.mesh.position.y = (bbox.max.z - bbox.min.z) / 6;
-            
-            this.scene.add(this.mesh);
-        });
+    // Try to create the 3D ASCII logo
+    try {
+        createASCIILogo();
+    } catch (error) {
+        console.error('Error creating ASCII logo:', error);
+        useFallbackASCII();
     }
-    
-    animate() {
-        requestAnimationFrame(() => this.animate());
-        
-        if (this.mesh) {
-            // Rotate only on Z-axis as requested
-            this.mesh.rotation.z += 0.02;
-        }
-        
-        this.render();
-    }
-    
-    render() {
-        this.effect.render(this.scene, this.camera);
+});
+
+function useFallbackASCII() {
+    console.log('Using fallback ASCII');
+    const logoContainer = document.getElementById('ascii-logo-container');
+    if (logoContainer) {
+        logoContainer.innerHTML = `
+            <pre id="ascii-logo" style="color: #00ff41; font-size: 8px; line-height: 1;">
+██      █████  ██    ██ 
+██     ██   ██ ██    ██ 
+██     ███████ ██    ██ 
+██     ██   ██ ██    ██ 
+█████████   ██  ██████  
+            </pre>
+        `;
     }
 }
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    // Small delay to ensure everything is loaded
-    setTimeout(() => {
-        if (document.getElementById('ascii-logo-container')) {
-            new ASCIILogo();
-        }
-    }, 100);
-});
+function createASCIILogo() {
+    console.log('Creating 3D ASCII logo');
+    
+    // Scene setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+    
+    // Camera
+    const camera = new THREE.PerspectiveCamera(45, 2, 0.1, 2000);
+    camera.position.set(5, 5, 10);
+    
+    // Renderer
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    
+    // ASCII Effect
+    const characters = ' .:-+*=%@#';
+    const effect = new THREE.AsciiEffect(renderer, characters, { 
+        invert: true, 
+        resolution: 0.15 
+    });
+    
+    effect.setSize(400, 200);
+    effect.domElement.style.color = '#00ff41';
+    effect.domElement.style.backgroundColor = 'transparent';
+    effect.domElement.style.fontSize = '6px';
+    effect.domElement.style.lineHeight = '6px';
+    
+    // Add to page
+    const logoContainer = document.getElementById('ascii-logo-container');
+    if (logoContainer) {
+        logoContainer.innerHTML = '';
+        logoContainer.appendChild(effect.domElement);
+        console.log('ASCII effect added to page');
+    }
+    
+    // Lighting
+    const pointLight = new THREE.PointLight(0xffffff, 1);
+    pointLight.position.set(10, 10, 10);
+    scene.add(pointLight);
+    
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+    scene.add(ambientLight);
+    
+    // Create geometry - simple "LAU" representation
+    const group = new THREE.Group();
+    
+    // L
+    const lGeometry = new THREE.BoxGeometry(0.5, 3, 0.5);
+    const lMesh = new THREE.Mesh(lGeometry, new THREE.MeshLambertMaterial());
+    lMesh.position.set(-2, 0, 0);
+    group.add(lMesh);
+    
+    // A 
+    const aGeometry = new THREE.ConeGeometry(0.7, 3, 3);
+    const aMesh = new THREE.Mesh(aGeometry, new THREE.MeshLambertMaterial());
+    aMesh.position.set(0, 0, 0);
+    group.add(aMesh);
+    
+    // U
+    const uGeometry = new THREE.TorusGeometry(0.8, 0.3, 8, 16, Math.PI);
+    const uMesh = new THREE.Mesh(uGeometry, new THREE.MeshLambertMaterial());
+    uMesh.position.set(2, 0, 0);
+    uMesh.rotation.z = Math.PI;
+    group.add(uMesh);
+    
+    scene.add(group);
+    
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        // Rotate on Z-axis only
+        group.rotation.z += 0.02;
+        
+        effect.render(scene, camera);
+    }
+    
+    console.log('Starting animation');
+    animate();
+}
