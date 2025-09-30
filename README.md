@@ -1,1 +1,1 @@
-# lauchriste.github.io
+# lauchristie.github.io/portfolio/
