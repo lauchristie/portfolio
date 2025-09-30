@@ -112,9 +112,17 @@ function createASCIILogo() {
         console.log('ASCII effect added to page');
     }
     
-    // Lighting setup matching original
+    // Lighting setup - using original light positioning from resetPositions
     const pointLight = new THREE.PointLight(0xffffff, 1, 0, 0);
-    pointLight.position.set(100, 100, 400);
+    // Light positioning based on resetPositions: lightSlider.value = 45, lightHeightSlider.value = 2
+    const lightAngle = 45 * Math.PI / 180; // 45 degrees
+    const lightRadius = 10; // Approximate radius
+    const lightHeight = 2 * 5; // Height multiplier * base height
+    pointLight.position.set(
+        Math.cos(lightAngle) * lightRadius, 
+        lightHeight, 
+        Math.sin(lightAngle) * lightRadius
+    );
     scene.add(pointLight);
     
     // Create "LAU" geometry
@@ -144,6 +152,13 @@ function createASCIILogo() {
     uMesh.rotation.z = Math.PI;
     group.add(uMesh);
     
+    // Apply resetPositions default values:
+    // Scale: 1, 1, 1 (default, no change needed)
+    group.scale.set(1, 1, 1);
+    
+    // Rotation: -90° on X-axis, 0° on Y and Z
+    group.rotation.set(-90 * Math.PI / 180, 0, 0);
+    
     // Center the group and compute bounding box like original
     const box = new THREE.Box3().setFromObject(group);
     const center = box.getCenter(new THREE.Vector3());
@@ -164,13 +179,15 @@ function createASCIILogo() {
     function animate() {
         requestAnimationFrame(animate);
         
-        // Rotate on Z-axis only
+        // Rotate on Z-axis only (keeping the -90° X rotation as base)
         group.rotation.z += 0.01; // Using original rotation speed
+        // Maintain the X rotation at -90°
+        group.rotation.x = -90 * Math.PI / 180;
         
         effect.render(scene, camera);
     }
     
-    console.log('Starting 3D animation with original parameters');
+    console.log('Starting 3D animation with resetPositions default values');
     animate();
 }
 
