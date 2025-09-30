@@ -10,66 +10,110 @@ class ASCIILogo {
         this.scene = null;
         this.camera = null;
         this.renderer = null;
+        this.effect = null;
         this.mesh = null;
-        this.asciiElement = document.getElementById('ascii-logo');
-        this.canvas = document.getElementById('ascii-canvas');
+        this.stlLoader = new THREE.STLLoader();
         
-        // ASCII conversion settings
-        this.chars = ' .,:;ox%#@';
-        this.width = 80;
-        this.height = 40;
+        // ASCII settings matching the original
+        this.characters = ' .:-+*=%@#';
+        this.effectSize = { amount: 0.205 };
+        this.backgroundColor = 'black';
+        this.ASCIIColor = 'white';
         
         this.init();
     }
     
     init() {
-        // Create Three.js scene
+        // Create scene
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 1000);
-        this.renderer = new THREE.WebGLRenderer({ 
-            canvas: this.canvas,
-            antialias: true 
+        this.scene.background = new THREE.Color(0, 0, 0);
+        
+        // Setup camera 
+        const width = Math.min(window.innerWidth, 800);
+        const height = Math.min(window.innerHeight, 400);
+        
+        this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000);
+        
+        // Create renderer
+        this.renderer = new THREE.WebGLRenderer();
+        
+        // Create ASCII effect (this is the key missing piece!)
+        this.effect = new THREE.AsciiEffect(this.renderer, this.characters, { 
+            invert: true, 
+            resolution: this.effectSize.amount 
         });
-        
-        this.renderer.setSize(this.width * 8, this.height * 8);
-        this.renderer.setClearColor(0x000000);
-        
-        // Position camera
-        this.camera.position.z = 5;
+        this.effect.setSize(width, height);
+        this.effect.domElement.style.color = this.ASCIIColor;
+        this.effect.domElement.style.backgroundColor = this.backgroundColor;
         
         // Add lighting
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(1, 1, 1);
-        this.scene.add(light);
+        const pointLight = new THREE.PointLight(0xffffff, 1, 0, 0);
+        pointLight.position.set(100, 100, 400);
+        this.scene.add(pointLight);
         
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
-        this.scene.add(ambientLight);
+        // Replace the ASCII logo div with the ASCII effect
+        const logoContainer = document.getElementById('ascii-logo-container');
+        if (logoContainer) {
+            logoContainer.innerHTML = '';
+            logoContainer.appendChild(this.effect.domElement);
+        }
         
-        // Load your LAU.stl file (you'll need to upload this)
-        this.loadModel();
+        // Load a simple geometry as placeholder (or your STL)
+        this.loadDefaultGeometry();
         
         // Start animation
         this.animate();
     }
     
-    loadModel() {
-        // For now, create a simple text geometry as placeholder
-        // Replace this with STL loader when you upload your model
-        const loader = new THREE.FontLoader();
-        
-        // Fallback: create simple box geometry with "LAU" concept
+    loadDefaultGeometry() {
+        // Create simple "LAU"-like geometry as placeholder
         const geometry = new THREE.BoxGeometry(2, 1, 0.5);
-        const material = new THREE.MeshLambertMaterial({ color: 0x00ff41 });
+        const material = new THREE.MeshStandardMaterial();
+        material.flatShading = true;
+        material.side = THREE.DoubleSide;
+        
         this.mesh = new THREE.Mesh(geometry, material);
+        
+        // Center and position the mesh
+        geometry.computeVertexNormals();
+        geometry.center();
+        geometry.computeBoundingBox();
+        
+        const bbox = geometry.boundingBox;
+        this.mesh.position.y = (bbox.max.z - bbox.min.z) / 5;
+        
+        // Position camera
+        this.camera.position.x = bbox.max.x * 4;
+        this.camera.position.y = bbox.max.y;
+        this.camera.position.z = bbox.max.z * 3;
+        
         this.scene.add(this.mesh);
         
-        // TODO: Replace with STL loader
-        // const stlLoader = new THREE.STLLoader();
-        // stlLoader.load('assets/lau-logo.stl', (geometry) => {
-        //     const material = new THREE.MeshLambertMaterial({ color: 0x00ff41 });
-        //     this.mesh = new THREE.Mesh(geometry, material);
-        //     this.scene.add(this.mesh);
-        // });
+        // TODO: Replace with your actual STL file
+        // this.loadSTL('./assets/lau-logo.stl');
+    }
+    
+    loadSTL(url) {
+        this.stlLoader.load(url, (geometry) => {
+            if (this.mesh) {
+                this.scene.remove(this.mesh);
+            }
+            
+            const material = new THREE.MeshStandardMaterial();
+            material.flatShading = true;
+            material.side = THREE.DoubleSide;
+            
+            this.mesh = new THREE.Mesh(geometry, material);
+            
+            geometry.computeVertexNormals();
+            geometry.center();
+            geometry.computeBoundingBox();
+            
+            const bbox = geometry.boundingBox;
+            this.mesh.position.y = (bbox.max.z - bbox.min.z) / 6;
+            
+            this.scene.add(this.mesh);
+        });
     }
     
     animate() {
@@ -80,45 +124,20 @@ class ASCIILogo {
             this.mesh.rotation.z += 0.02;
         }
         
-        this.renderer.render(this.scene, this.camera);
-        this.convertToASCII();
+        this.render();
     }
     
-    convertToASCII() {
-        const canvas = this.renderer.domElement;
-        const ctx = canvas.getContext('2d');
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const pixels = imageData.data;
-        
-        let ascii = '';
-        
-        for (let y = 0; y < this.height; y++) {
-            for (let x = 0; x < this.width; x++) {
-                const pixelX = Math.floor((x / this.width) * canvas.width);
-                const pixelY = Math.floor((y / this.height) * canvas.height);
-                const index = (pixelY * canvas.width + pixelX) * 4;
-                
-                // Get pixel brightness
-                const r = pixels[index];
-                const g = pixels[index + 1];
-                const b = pixels[index + 2];
-                const brightness = (r + g + b) / 3;
-                
-                // Convert to ASCII character
-                const charIndex = Math.floor((brightness / 255) * (this.chars.length - 1));
-                ascii += this.chars[charIndex];
-            }
-            ascii += '\n';
-        }
-        
-        this.asciiElement.textContent = ascii;
+    render() {
+        this.effect.render(this.scene, this.camera);
     }
 }
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Only initialize if we're on the main page
-    if (document.getElementById('ascii-logo')) {
-        new ASCIILogo();
-    }
+    // Small delay to ensure everything is loaded
+    setTimeout(() => {
+        if (document.getElementById('ascii-logo-container')) {
+            new ASCIILogo();
+        }
+    }, 100);
 });
