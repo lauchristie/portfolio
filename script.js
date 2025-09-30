@@ -66,48 +66,38 @@ function useFallbackASCII() {
     if (logoContainer) {
         logoContainer.innerHTML = `
             <pre id="ascii-logo" style="color: #00ff41; font-size: 8px; line-height: 1;">
-██      █████  ██    ██ 
-██     ██   ██ ██    ██ 
-██     ███████ ██    ██ 
-██     ██   ██ ██    ██ 
-█████████   ██  ██████  
+â–ˆâ–ˆ      â–ˆâ–ˆâ–ˆâ–ˆâ–ˆ  â–ˆâ–ˆ    â–ˆâ–ˆ 
+â–ˆâ–ˆ     â–ˆâ–ˆ   â–ˆâ–ˆ â–ˆâ–ˆ    â–ˆâ–ˆ 
+â–ˆâ–ˆ     â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ â–ˆâ–ˆ    â–ˆâ–ˆ 
+â–ˆâ–ˆ     â–ˆâ–ˆ   â–ˆâ–ˆ â–ˆâ–ˆ    â–ˆâ–ˆ 
+â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ   â–ˆâ–ˆ  â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆ  
             </pre>
         `;
     }
 }
 
 function createASCIILogo() {
-    console.log('Creating 3D ASCII logo with exported values');
-    
-    // Exported values from debug session
-    const exportedValues = {
-        camera: { x: 10, y: 10, z: 6.5 },
-        scale: 0.2,
-        rotation: { x: -120, y: -30, z: 90 },
-        position: { x: 0, y: 0, z: 0 },
-        light: { angle: 45, distance: 4, height: 6 }
-    };
+    console.log('Creating 3D ASCII logo');
     
     // Scene setup
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
     
-    // Use full container dimensions
+    // Use full container dimensions like the original
     const containerWidth = 600;
     const containerHeight = 300;
     
-    // Camera setup with exported values
+    // Camera setup matching original proportions
     const camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 0.1, 2000);
-    camera.position.set(exportedValues.camera.x, exportedValues.camera.y, exportedValues.camera.z);
     
     // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     
-    // ASCII Effect
+    // ASCII Effect using original parameters
     const characters = ' .:-+*=%@#';
     const effect = new THREE.AsciiEffect(renderer, characters, { 
         invert: true, 
-        resolution: 0.205
+        resolution: 0.205 // Using original resolution setting
     });
     
     effect.setSize(containerWidth, containerHeight);
@@ -122,155 +112,83 @@ function createASCIILogo() {
         console.log('ASCII effect added to page');
     }
     
-    // Lighting setup with exported values
+    // Lighting setup - using original light positioning from resetPositions
     const pointLight = new THREE.PointLight(0xffffff, 1, 0, 0);
-    const lightAngle = exportedValues.light.angle * Math.PI / 180;
-    const lightDistance = exportedValues.light.distance;
-    const lightHeight = exportedValues.light.height;
-    
+    // Light positioning based on resetPositions: lightSlider.value = 45, lightHeightSlider.value = 2
+    const lightAngle = 45 * Math.PI / 180; // 45 degrees
+    const lightRadius = 10; // Approximate radius
+    const lightHeight = 2 * 5; // Height multiplier * base height
     pointLight.position.set(
-        Math.cos(lightAngle) * lightDistance,
-        lightHeight,
-        Math.sin(lightAngle) * lightDistance
+        Math.cos(lightAngle) * lightRadius, 
+        lightHeight, 
+        Math.sin(lightAngle) * lightRadius
     );
     scene.add(pointLight);
     
-    // Ambient light for better visibility
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
-    scene.add(ambientLight);
-    
-    // Create group for the model
+    // Create "LAU" geometry
     const group = new THREE.Group();
     
-    // Material
-    const material = new THREE.MeshStandardMaterial({
-        color: 0x00ff41,
-        flatShading: false,
-        side: THREE.DoubleSide
-    });
+    // Material matching original
+    const material = new THREE.MeshStandardMaterial();
+    material.flatShading = true;
+    material.side = THREE.DoubleSide;
     
-    // STL Loader - try to load LAU.stl
-    const loader = new THREE.STLLoader();
+    // L
+    const lGeometry = new THREE.BoxGeometry(0.5, 3, 0.5);
+    const lMesh = new THREE.Mesh(lGeometry, material);
+    lMesh.position.set(-2, 0, 0);
+    group.add(lMesh);
     
-    const paths = [
-        'portfolio/assets/LAU.stl',
-        'assets/LAU.stl',
-        '../assets/LAU.stl',
-        './assets/LAU.stl'
-    ];
+    // A 
+    const aGeometry = new THREE.ConeGeometry(0.7, 3, 4);
+    const aMesh = new THREE.Mesh(aGeometry, material);
+    aMesh.position.set(0, 0, 0);
+    group.add(aMesh);
     
-    let pathIndex = 0;
+    // U
+    const uGeometry = new THREE.TorusGeometry(0.8, 0.3, 8, 16, Math.PI);
+    const uMesh = new THREE.Mesh(uGeometry, material);
+    uMesh.position.set(2, 0, 0);
+    uMesh.rotation.z = Math.PI;
+    group.add(uMesh);
     
-    function tryLoadPath() {
-        if (pathIndex >= paths.length) {
-            console.warn('Could not load LAU.stl, using fallback geometry');
-            createFallbackGeometry();
-            return;
-        }
-        
-        const currentPath = paths[pathIndex];
-        console.log(`Attempting to load STL from: ${currentPath}`);
-        
-        loader.load(
-            currentPath,
-            function (geometry) {
-                console.log('STL loaded successfully from:', currentPath);
-                
-                // Center the geometry
-                geometry.computeBoundingBox();
-                const center = new THREE.Vector3();
-                geometry.boundingBox.getCenter(center);
-                geometry.translate(-center.x, -center.y, -center.z);
-                
-                const mesh = new THREE.Mesh(geometry, material);
-                group.add(mesh);
-                scene.add(group);
-                
-                // Apply exported values
-                applyExportedValues();
-                
-                // Start animation
-                animate();
-            },
-            function (progress) {
-                if (progress.total > 0) {
-                    const percent = (progress.loaded / progress.total * 100).toFixed(0);
-                    console.log(`Loading: ${percent}%`);
-                }
-            },
-            function (error) {
-                console.warn(`Failed to load from ${currentPath}:`, error);
-                pathIndex++;
-                tryLoadPath();
-            }
-        );
-    }
+    // Apply resetPositions default values:
+    // Scale: 1, 1, 1 (default, no change needed)
+    group.scale.set(1, 1, 1);
     
-    function createFallbackGeometry() {
-        console.log('Creating fallback LAU geometry');
-        
-        // L
-        const lGeometry = new THREE.BoxGeometry(0.5, 3, 0.5);
-        const lMesh = new THREE.Mesh(lGeometry, material);
-        lMesh.position.set(-2, 0, 0);
-        group.add(lMesh);
-        
-        // A 
-        const aGeometry = new THREE.ConeGeometry(0.7, 3, 4);
-        const aMesh = new THREE.Mesh(aGeometry, material);
-        aMesh.position.set(0, 0, 0);
-        group.add(aMesh);
-        
-        // U
-        const uGeometry = new THREE.TorusGeometry(0.8, 0.3, 8, 16, Math.PI);
-        const uMesh = new THREE.Mesh(uGeometry, material);
-        uMesh.position.set(2, 0, 0);
-        uMesh.rotation.z = Math.PI;
-        group.add(uMesh);
-        
-        scene.add(group);
-        
-        // Apply exported values
-        applyExportedValues();
-        
-        // Start animation
-        animate();
-    }
+    // Rotation: -90Â° on X-axis, 0Â° on Y and Z
+    group.rotation.set(-90 * Math.PI / 180, 0, 0);
     
-    function applyExportedValues() {
-        // Apply scale
-        group.scale.set(exportedValues.scale, exportedValues.scale, exportedValues.scale);
-        
-        // Apply rotation (convert degrees to radians)
-        group.rotation.set(
-            exportedValues.rotation.x * Math.PI / 180,
-            exportedValues.rotation.y * Math.PI / 180,
-            exportedValues.rotation.z * Math.PI / 180
-        );
-        
-        // Apply position
-        group.position.set(
-            exportedValues.position.x,
-            exportedValues.position.y,
-            exportedValues.position.z
-        );
-        
-        console.log('Applied exported values:', exportedValues);
-    }
+    // Center the group and compute bounding box like original
+    const box = new THREE.Box3().setFromObject(group);
+    const center = box.getCenter(new THREE.Vector3());
+    group.position.sub(center); // Center the geometry
+    
+    scene.add(group);
+    
+    // Calculate bounding box for camera positioning (like original)
+    const bbox = box;
+    const size = bbox.getSize(new THREE.Vector3());
+    
+    // Position camera based on bounding box (original approach)
+    camera.position.x = size.x * 2;
+    camera.position.y = size.y * 1;
+    camera.position.z = size.z * 4;
     
     // Animation loop
     function animate() {
         requestAnimationFrame(animate);
         
-        // Slow rotation on Z-axis to keep the model dynamic
-        group.rotation.z += 0.005;
+        // Rotate on Z-axis only (keeping the -90Â° X rotation as base)
+        group.rotation.z += 0.01; // Using original rotation speed
+        // Maintain the X rotation at -90Â°
+        group.rotation.x = -90 * Math.PI / 180;
         
         effect.render(scene, camera);
     }
     
-    // Start loading process
-    console.log('Starting STL load attempt');
-    tryLoadPath();
+    console.log('Starting 3D animation with resetPositions default values');
+    animate();
 }
 
 // Initialize the page
@@ -290,11 +208,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Type the initial command
     const initialCommand = document.getElementById('initial-command');
-    if (initialCommand) {
-        setTimeout(() => {
-            typeText(initialCommand, './christie_lau', 100);
-        }, 500);
-    }
+    setTimeout(() => {
+        typeText(initialCommand, './christie_lau', 100);
+    }, 500);
     
     // Add click handlers for navigation
     const navItems = document.querySelectorAll('.nav-item');
@@ -305,3 +221,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Optional: Add some dynamic effects
+function addMatrixRain() {
+    // Matrix-style rain effect (optional enhancement)
+    // You can implement this later for extra visual flair
+}
