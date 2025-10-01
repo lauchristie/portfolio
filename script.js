@@ -81,7 +81,7 @@ function createASCIILogo() {
     
     // Exported values from debug session - for STL file
     const stlValues = {
-        camera: { x: -5, y: 0, z: 40 },
+        camera: { x: 0, y: 0, z: 40 },
         scale: 0.7,
         rotation: { x: -95, y: 0, z: 44 },
         position: { x: 0, y: 0, z: 0.5 },
