@@ -127,14 +127,6 @@ function createASCIILogo() {
     effect.domElement.style.color = '#00ff41';
     effect.domElement.style.backgroundColor = 'transparent';
     
-    // Add to page
-    const logoContainer = document.getElementById('ascii-logo-container');
-    if (logoContainer) {
-        logoContainer.innerHTML = '';
-        logoContainer.appendChild(effect.domElement);
-        console.log('ASCII effect added to page');
-    }
-    
     // Lighting setup with exported values
     const pointLight = new THREE.PointLight(0xffffff, 1, 0, 0);
     const lightAngle = exportedValues.light.angle * Math.PI / 180;
