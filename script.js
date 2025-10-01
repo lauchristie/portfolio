@@ -104,9 +104,8 @@ function createASCIILogo() {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
     
-    // Get container dimensions FIRST
-    const logoContainer = document.getElementById('ascii-logo-container');
-    const containerWidth = logoContainer ? logoContainer.clientWidth : 600;
+    // Fixed dimensions for consistent rendering
+    const containerWidth = 800;
     const containerHeight = 400;
     
     // Camera setup with exported values
@@ -126,6 +125,14 @@ function createASCIILogo() {
     effect.setSize(containerWidth, containerHeight);
     effect.domElement.style.color = '#00ff41';
     effect.domElement.style.backgroundColor = 'transparent';
+    
+    // Add to page
+    const logoContainer = document.getElementById('ascii-logo-container');
+    if (logoContainer) {
+        logoContainer.innerHTML = '';
+        logoContainer.appendChild(effect.domElement);
+        console.log('ASCII effect added to page');
+    }
     
     // Lighting setup with exported values
     const pointLight = new THREE.PointLight(0xffffff, 1, 0, 0);
@@ -298,12 +305,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         initASCIILogo();
     }, 100);
-    
-    // Fallback ASCII logo if 3D version doesn't load
-    const logoElement = document.getElementById('ascii-logo');
-    if (logoElement && !logoElement.textContent.trim()) {
-        logoElement.textContent = fallbackASCII;
-    }
     
     // Type the initial command
     const initialCommand = document.getElementById('initial-command');
