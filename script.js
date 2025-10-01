@@ -83,8 +83,8 @@ function createASCIILogo() {
     const stlValues = {
         camera: { x: 0, y: 0, z: 40 },
         scale: 0.7,
-        rotation: { x: -120, y: -5, z: -100 },
-        position: { x: 0, y: 0, z: 0 },
+        rotation: { x: -95, y: 0, z: 44 },
+        position: { x: 0, y: 0, z: 0.5 },
         light: { angle: 65, distance: 49, height: -1 }
     };
     
@@ -119,7 +119,7 @@ function createASCIILogo() {
     const characters = ' .:-+*=%@#';
     const effect = new THREE.AsciiEffect(renderer, characters, { 
         invert: true, 
-        resolution: 0.205
+        resolution: 0.18
     });
     
     effect.setSize(containerWidth, containerHeight);
