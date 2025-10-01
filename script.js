@@ -104,8 +104,9 @@ function createASCIILogo() {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
     
-    // Use full container dimensions
-    const containerWidth = 600;
+    // Get container dimensions FIRST
+    const logoContainer = document.getElementById('ascii-logo-container');
+    const containerWidth = logoContainer ? logoContainer.clientWidth : 600;
     const containerHeight = 400;
     
     // Camera setup with exported values
