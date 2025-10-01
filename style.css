@@ -86,11 +86,12 @@ body {
     height: 400px;
     margin-bottom: 20px;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
 }
 
 #ascii-logo-container pre {
     margin: 0;
-    width: 100%;
 }
 
 /* Command line styling */
