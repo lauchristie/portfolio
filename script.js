@@ -119,7 +119,7 @@ function createASCIILogo() {
     const characters = ' .:-+*=%@#';
     const effect = new THREE.AsciiEffect(renderer, characters, { 
         invert: true, 
-        resolution: 0.18
+        resolution: 0.12
     });
     
     effect.setSize(containerWidth, containerHeight);
