@@ -81,11 +81,11 @@ function createASCIILogo() {
     
     // Exported values from debug session - for STL file
     const stlValues = {
-        camera: { x: 10, y: 10, z: 6.5 },
+        camera: { x: 20, y: 20, z: 40.5 },
         scale: 0.7,
         rotation: { x: -120, y: -30, z: 90 },
         position: { x: 0, y: 0, z: 0 },
-        light: { angle: 45, distance: 4, height: 6 }
+        light: { angle: 65, distance: 49, height: -1 }
     };
     
     // Fallback values for simple geometry (matching original resetPositions)
